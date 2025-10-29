@@ -15,7 +15,7 @@ jobs:
           python-version: '3.12.5'
 
       - name: Install Python dependencies
-        run: pip install scipy pint open_atomos_jupyter_utils nbconvert
+        run: pip install scipy pint open_atmos_jupyter_utils nbconvert
 
       - name: Install system dependencies
         run: |
