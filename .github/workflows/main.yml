@@ -1,7 +1,32 @@
 name: sprawozdanie
+
 on: push
+
 jobs:
   pdf:
-    runs-on:  windows
-    setups:
-      - run: pip install scipy pint open_atomos_jupyter_utils
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.5'
+
+      - name: Install Python dependencies
+        run: pip install scipy pint open_atomos_jupyter_utils nbconvert
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-xetex inkscape pandoc
+
+      - name: Convert notebook to PDF
+        run: python -m nbconvert --to pdf --execute lab1.ipynb
+
+      - name: Upload generated PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprawozdanie-pdf
+          path: lab1.pdf
