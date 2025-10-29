@@ -3,5 +3,5 @@ on: push
 jobs:
   pdf:
     runs-on:  windows
-    setps:
-      - pip install scipy,pint,open_atomos_jupyter_utils
+    setups:
+      - run: pip install scipy pint open_atomos_jupyter_utils
