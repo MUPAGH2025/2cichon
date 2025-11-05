@@ -15,18 +15,27 @@ jobs:
           python-version: '3.12.5'
 
       - name: Install Python dependencies
-        run: pip install scipy pint open_atmos_jupyter_utils nbconvert
+        run: |
+          pip install scipy pint open_atmos_jupyter_utils nbconvert nbclient ipykernel
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y texlive-xetex inkscape pandoc
 
+      # ten krok wykona notebook, wygeneruje PDF i GIF
       - name: Convert notebook to PDF
         run: python -m nbconvert --to pdf --execute upwind.ipynb
 
-      - name: Upload generated PDF
+      # artifacts
+      - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          name: animation
+          name: sprawozdanie_pdf
+          path: upwind.pdf
+
+      - name: Upload GIF animation
+        uses: actions/upload-artifact@v4
+        with:
+          name: animacja
           path: anim.gif
