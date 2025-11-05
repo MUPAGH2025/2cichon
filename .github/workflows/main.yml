@@ -23,10 +23,10 @@ jobs:
           sudo apt-get install -y texlive-xetex inkscape pandoc
 
       - name: Convert notebook to PDF
-        run: python -m nbconvert --to pdf --execute lab1.ipynb
+        run: python -m nbconvert --to pdf --execute upwind.ipynb
 
       - name: Upload generated PDF
         uses: actions/upload-artifact@v4
         with:
-          name: sprawozdanie-pdf
-          path: lab1.pdf
+          name: animation
+          path: anim.gif
