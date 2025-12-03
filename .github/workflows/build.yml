@@ -23,11 +23,22 @@ jobs:
 
     - name: Install Python libs
       run: |
-        pip install "numpy<1.27"
-        pip install "numba<0.60"
+        # 1. Najpierw wymuś poprawne wersje NumPy i Numba
+        pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
+    
+        # 2. Zainstaluj PyMPDATA (korzysta z numby)
         pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
-        pip install matplotlib jupyter nbconvert imageio tqdm ipykernel
-        pip install open-atmos-jupyter-utils || pip install git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
+    
+        # 3. Dopiero potem resztę
+        pip install --no-cache-dir matplotlib imageio tqdm jupyter nbconvert ipykernel
+    
+        # 4. open-atmos-jupyter-utils – może wymuszać NumPy 2.x, więc niech idzie po PyMPDATA
+        pip install --no-cache-dir open-atmos-jupyter-utils \
+          || pip install --no-cache-dir git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
+    
+        # 5. I na koniec *znowu* wymuś wersję
+        pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
+
 
 
     - name: Register Jupyter kernel
