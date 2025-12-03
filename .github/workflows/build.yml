@@ -1,0 +1,55 @@
+name: Run simulations and build LaTeX report
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # ----------------------------
+    # 1. Install Python
+    # ----------------------------
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Python libs
+      run: |
+        pip install numpy matplotlib jupyter nbconvert imageio
+
+    # ----------------------------
+    # 2. Run the notebook
+    # ----------------------------
+    - name: Execute Jupyter notebook
+      run: |
+        jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
+          --output notebook/projekt_tsunami_executed.ipynb
+
+    # ----------------------------
+    # 3. Install LaTeX
+    # ----------------------------
+    - name: Install LaTeX
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: main.tex
+        working_directory: report
+
+    # ----------------------------
+    # 4. Upload artifacts
+    # ----------------------------
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: report-and-simulation-outputs
+        path: |
+          report/main.pdf
+          notebook/projekt_tsunami_executed.ipynb
+          fig/
