@@ -52,7 +52,8 @@ jobs:
         jupyter nbconvert \
           --to notebook \
           --execute notebook/projekt_tsunami.ipynb \
-          --output notebook/projekt_tsunami_executed.ipynb \
+          --output projekt_tsunami_executed.ipynb \
+          --output-dir notebook \
           --ExecutePreprocessor.timeout=3600 \
           --debug
 
