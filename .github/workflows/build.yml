@@ -23,16 +23,20 @@ jobs:
 
     - name: Install Python libs
       run: |
-        pip install numpy matplotlib jupyter nbconvert imageio PyMPDATA open-atmos-jupyter-utils tqdm
+        pip install numpy matplotlib jupyter nbconvert imageio PyMPDATA open-atmos-jupyter-utils tqdm ipykernel
+
+    - name: Register Jupyter kernel
+      run: |
+        python -m ipykernel install --user --name python3
 
     # ----------------------------
     # 2. Run the notebook
     # ----------------------------
-    - name: Execute Jupyter notebook
+    - name: Run notebook
       run: |
         jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
-          --output notebook/projekt_tsunami_executed.ipynb
-
+          --output projekt_tsunami_executed.ipynb \
+          --ExecutePreprocessor.timeout=3600
     # ----------------------------
     # 3. Install LaTeX
     # ----------------------------
