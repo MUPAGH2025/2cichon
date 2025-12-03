@@ -19,15 +19,16 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.12.5"
+        python-version: "3.11"
 
     - name: Install Python libs
       run: |
-        pip install numpy matplotlib jupyter nbconvert imageio PyMPDATA open-atmos-jupyter-utils tqdm ipykernel
+        pip install numpy matplotlib jupyter nbconvert imageio tqdm ipykernel
+        pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
+        pip install open-atmos-jupyter-utils || pip install git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
 
     - name: Register Jupyter kernel
-      run: |
-        python -m ipykernel install --user --name python3
+      run: python -m ipykernel install --user --name python3
 
     # ----------------------------
     # 2. Run the notebook
@@ -36,9 +37,11 @@ jobs:
       run: |
         jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
           --output projekt_tsunami_executed.ipynb \
-          --ExecutePreprocessor.timeout=3600
+          --ExecutePreprocessor.timeout=3600 \
+          --debug
+
     # ----------------------------
-    # 3. Install LaTeX
+    # 3. Build LaTeX
     # ----------------------------
     - name: Install LaTeX
       uses: xu-cheng/latex-action@v3
@@ -55,5 +58,6 @@ jobs:
         name: report-and-simulation-outputs
         path: |
           report/main.pdf
-          notebook/projekt_tsunami_executed.ipynb
+          projekt_tsunami_executed.ipynb
           fig/
+  
