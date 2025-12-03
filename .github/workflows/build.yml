@@ -23,7 +23,7 @@ jobs:
 
     - name: Install Python libs
       run: |
-        pip install numpy matplotlib jupyter nbconvert imageio PyMDATA open-atmos-jupyter-utils tqdm
+        pip install numpy matplotlib jupyter nbconvert imageio PyMPDATA open-atmos-jupyter-utils tqdm
 
     # ----------------------------
     # 2. Run the notebook
