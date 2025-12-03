@@ -23,9 +23,12 @@ jobs:
 
     - name: Install Python libs
       run: |
-        pip install numpy matplotlib jupyter nbconvert imageio tqdm ipykernel
+        pip install "numpy<1.27"
+        pip install "numba<0.60"
         pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
+        pip install matplotlib jupyter nbconvert imageio tqdm ipykernel
         pip install open-atmos-jupyter-utils || pip install git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
+
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
