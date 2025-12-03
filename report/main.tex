@@ -77,7 +77,7 @@ Dla potwierdzenia poprawności uzyskiwanego wyniku numerycznego przeprowadzono p
     \caption{Porównanie wyniku numerycznego i wyniku przybliżonego na podstawie prawa greena.}
     \label{fig:comparison}
 \end{figure}
-Różnica między wynikiem numerycznym a analitycznym wynika z ograniczeń prawa Greena, które obowiązuje jedynie na łagodnie zmieniającym się dnie i dla fal o małej amplitudzie. W obszarze stromego spłycenia batymetrii założenia „mild-slope” przestają być spełnione, pojawia się częściowe odbicie energii oraz nieliniowe efekty związane z początkiem załamywania fali, których model analityczny nie uwzględnia. W efekcie prawo Greena przewiduje niefizycznie duży wzrost amplitudy, natomiast model numeryczny oparty na równaniach płytkowodnych daje realistycznie niższe maksimum oraz stopniowe zmniejszanie amplitudy na płytkiej półce.
+Różnica między wynikiem numerycznym a analitycznym wynika z ograniczeń prawa Greena, które obowiązuje jedynie na łagodnie zmieniającym się dnie i dla fal o małej amplitudzie. W obszarze stromego spłycenia batymetrii założenia „mild-slope” przestają być spełnione, pojawia się częściowe odbicie energii oraz nieliniowe efekty związane z początkiem załamywania fali, których model analityczny nie uwzględnia. W efekcie prawo Greena przewiduje niefizycznie duży wzrost amplitudy, natomiast model numeryczny oparty na równaniach płytkowodnych daje realistycznie niższe maksimum. Następujący po maksimum nagły spadek i opadanie maksimum fali najprawdopodobniej związane jest z efektami numerycznymi.
 
 Finalnie przebadano 3 przypadki gdzie $db/dx$ wynosi kolejno: 0.023, 0.030, 0.090. Wyniki przedstawione zostały na rysunku \ref{fig:result1}.
 
@@ -116,9 +116,7 @@ Dla lepszego zilustrowania porównania uzyskanych rezultatów, $\zeta_{max}$ dla
     
 \end{table}
 
+Na podstawie uzyskanych danych należy stwierdzić, że wyniki dla bardzo stromego wybrzeża nie mogą zostać użyte do wyciągnięcia wniosków ze względu na duży wpływ efektów numerycznych na wynik. Niezależnie od siatki kształt amplitudy fali staje się skokowy, co nie ma sensu fizycznego.
+
 \section{Odpowiedź na pytanie}
 Na podstawie uzyskanych wyników można stwierdzić, że w granicach jakości uzyskanego wyniku, nie ma znaczącej zależności maksymalnej wysokości fali tsunami w zależności od nachylenia wybrzeża.
-
-\section{Kod}
-Kod dostępny jest w repozytorium: https://github.com/MUPAGH2025/2cichon
-\end{document}
