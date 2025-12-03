@@ -1,0 +1,124 @@
+\documentclass{article}
+
+% Language setting
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+
+
+
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+\usepackage{svg}
+
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{array}
+
+\begin{document}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\begin{center}
+\textsc{\LARGE Modelowanie Układów Przepływowych}\\[0.1cm]
+\textsc{\large PROJEKT}\\[0.2cm]
+\HRule \\[0.2cm]
+{ \huge \bfseries Jak zmiana nachylenia dna wpływa
+na maksymalną wysokość fali tsunami przy brzegu dla tego
+samego źródła?}\\[0.2cm]
+\HRule \\[0.2cm]
+\large\emph{Autor: }\textsc{Mikołaj Cichoń}\\
+\end{center}
+
+\section{Wstęp}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../fig/shoaling_diagram.pdf}
+    \caption{Wizualizacja problemu.}
+    \label{fig:problem}
+\end{figure}
+Problematyką tego projektu jest zbadanie wpływu nachylenia dna na wysokość fali tsunami. Tsunami powstaje m.in. przez nagłą zmianę ukształtowania dna oceanicznego w wyniku na przykład aktywności tektonicznej. Przykładowe podniesienie się dna powoduje powstaje fali, która początkowo ma niewielką amplitudę $\zeta_{max}$ lecz dużą prędkość. Wraz ze zmniejszaniem się głębokości $h$ obserwujemy efekt \textit{shoalingu}, czyli zmniejszania prędkości fali i zwiększania jej amplitudy.
+
+Odpowiedź na zadane w projekcie pytanie zostanie uzyskane za pomocą równań płytkiej wody, które sformułowane za pomocą zmiennych $\zeta(t,x,y)$, $b(x,y)$, $h(t,x,y) = \zeta + b$ oraz $\vec{u}=[u,v]$ mają postać daną równaniem \eqref{eq:shallow}:
+
+\begin{equation}
+    \begin{cases}
+  \partial_t h &=\! -\nabla \cdot (\vec{u}h)\\
+  \partial_t (hu) &=\! -\nabla \cdot (\vec{u}hu) - gh\partial_x\zeta \\
+  \partial_t (hv) &=\! -\nabla \cdot (\vec{u}hv) - gh\partial_y\zeta
+\end{cases}
+\label{eq:shallow}
+\end{equation}
+Jeżeli spełniony jest warunek:
+$$\left|\frac{db}{dx}\right|\ll1$$
+to amplitudę fali może opisywać prawo Greena dane wzorem \eqref{eq:green}:
+\begin{equation}
+    \zeta_{max}(x) = \zeta_{max,0}\left(\frac{b_0}{b(x)}\right)^{\frac{1}{4}} \label{eq:green}
+\end{equation}
+gdzie $\zeta_{max,0}$ to amplituda fali na głębokości $b_0$.
+
+\section{Rozwiązanie numeryczne}
+Numerycznie równanie \eqref{eq:shallow} zostało rozwiązane przy użyciu biblioteki PyMDATA. Ze względu na to, że odpowiedzią na zadane pytanie jest maksymalna amplituda fali w przebiegu oraz jej zmienność w zależności od stromości wybrzeża, zdecydowano się na zadanie zaburzenia początkowego w formie fali równoległej do brzegu. Wprowadzenie początkowej anomalii jako warunku początkowego powoduje powstanie dwóch fal o dwuktornie mniejszej amplitudzie podróżujących w przeciwnych kierunkach. Ze względu napotkane niestabilności numeryczne i mały wybór warunków brzegowych, zdecydowano się na zastowanie warunku Dirichleta zerującego zmienne. Powoduje to odbicie fali od brzegu siatki. Rozpatrywane wyniki są filtrowane do uzyskania wartości osiągniętych przez pierwszą falę unikając niepożądanej interferencji z falą odbitą. \\
+
+Ponieważ problem w zasadzie jest jednowymiarowy, siatka została ustawiona jako 120 x 20, gdzie mamy 100 komórek w osi x. Kroki $dx$ i $dy$ odpowiada 1 km w skali fizycznej. Aby symulacja była numerycznie stabilna, $dt$ musi zostać dobrane w taki sposób, żeby spełniony był warunek CFL oraz, żeby prędkość fali reprezentowana numerycznie poprzez liczbę Couranta nie przekraczała 1. W związku z tym dla problemu ustalono $dt/dx=dt/dy=0.005$. W przeliczeniu na jednostki fizyczne, $dt = 5\text{ s}$. Ilość kroków czasowych, przy której uzyskiwany wynik jest satysfakcjonujący to 10 000, więc 14 h. \\
+
+W projekcie przeprowadzono symulacje dla różnych nachyleń $db/dx$, które ustawiane są poprzez położenie końca głębinowej części siatki. Ze względu na to, że celem projektu jest zbadanie zjawiska shoalingu, batymeria została ustawiona w miejscu wystąpienia anomalii na 1.0, zaś w miejscu "niby brzegu" na 0.05. Skala fizyczna dla batymetrii to b = 1.0 (numerycznie) = 100 m (fizycznie).\\
+
+Zaburzenie początkowe tworzy dwie równoległe fale gaussowskie podróżujące w przeciwnych kierunkach z $\zeta_{max}=0.025$, czyli w skali fizycznej 2.5 m.
+
+Dla potwierdzenia poprawności uzyskiwanego wyniku numerycznego przeprowadzono porównanie wyniku numerycznego i przewidywanego wyniku na podstawie \eqref{eq:green}, które została przedstawione na rysunku \ref{fig:comparison}, gdzie $db/dx=0.0225$.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{../fig/low_gradient_comparison.pdf}
+    \caption{Porównanie wyniku numerycznego i wyniku przybliżonego na podstawie prawa greena.}
+    \label{fig:comparison}
+\end{figure}
+Różnica między wynikiem numerycznym a analitycznym wynika z ograniczeń prawa Greena, które obowiązuje jedynie na łagodnie zmieniającym się dnie i dla fal o małej amplitudzie. W obszarze stromego spłycenia batymetrii założenia „mild-slope” przestają być spełnione, pojawia się częściowe odbicie energii oraz nieliniowe efekty związane z początkiem załamywania fali, których model analityczny nie uwzględnia. W efekcie prawo Greena przewiduje niefizycznie duży wzrost amplitudy, natomiast model numeryczny oparty na równaniach płytkowodnych daje realistycznie niższe maksimum oraz stopniowe zmniejszanie amplitudy na płytkiej półce.
+
+Finalnie przebadano 3 przypadki gdzie $db/dx$ wynosi kolejno: 0.023, 0.030, 0.090. Wyniki przedstawione zostały na rysunku \ref{fig:result1}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{../fig/results1.pdf}
+    \caption{Amplituda fali tsunami w zależności od nachylenia brzegu.}
+    \label{fig:result1}
+\end{figure}
+
+
+
+\section{Zależność wyniku od siatki}
+
+W celu zbadania zależności wyniku od rozdzielczości czasowej oraz przestrzennej, siatka przestrzenna została rozszerzona do 240x40, zaś krok czasowy został zmniejszony tak, że $dt/dx=dt/dy=0.0025$. W związku z tym wymagana ilość kroków czasowych wynosi 20 000. Ustawienia batymetrii zostały odpowiednio dostosowane. Ze względu na bardzo duży czas obliczeniowy wymagany dla takiej rozdzielczości, obliczenia zostały przeprowadzone jedynie dla przypadków, gdzie $db/dx = 0.023$ oraz 0.090. Wyniki zostały przedstawione na rysunku \ref{fig:result2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{../fig/results2.pdf}
+    \caption{Amplituda fali tsunami w zależności od nachylenia brzegu dla siatki czasowo-przestrzennej o dwukrotnej rozdzielczości.}
+    \label{fig:result2}
+\end{figure}
+
+Dla lepszego zilustrowania porównania uzyskanych rezultatów, $\zeta_{max}$ dla obu siatek w raz z ich różnicą przedstawiono w tabeli \ref{tab:comparison}.
+
+\begin{table}[H]
+    \centering
+\caption{Porówanie uzyskanych amplitud w zależności od rozdzielczości siatki.}
+\label{tab:comparison}
+    \begin{tabular}{|>{\centering\arraybackslash}p{0.15\linewidth}||>{\centering\arraybackslash}p{0.15\linewidth}|>{\centering\arraybackslash}p{0.15\linewidth}|>{\centering\arraybackslash}p{0.15\linewidth}|}\hline
+          $db/dx$&Mniejsza rozdzielczość&  Większa rozdzielczość& Różnica\\\hline
+          0.023&4.799 m&  5.046 m& 4.89 \%\\\hline
+          0.090&5.029 m&  4.628 m& 8.66 \%\\ \hline
+    \end{tabular}
+    
+    
+\end{table}
+
+\section{Odpowiedź na pytanie}
+Na podstawie uzyskanych wyników można stwierdzić, że w granicach jakości uzyskanego wyniku, nie ma znaczącej zależności maksymalnej wysokości fali tsunami w zależności od nachylenia wybrzeża.
+
+\section{Kod}
+Kod dostępny jest w repozytorium: https://github.com/MUPAGH2025/2cichon
+\end{document}
