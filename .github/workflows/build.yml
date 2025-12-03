@@ -49,10 +49,13 @@ jobs:
     # ----------------------------
     - name: Run notebook
       run: |
-        jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
-          --output projekt_tsunami_executed.ipynb \
+        jupyter nbconvert \
+          --to notebook \
+          --execute notebook/projekt_tsunami.ipynb \
+          --output notebook/projekt_tsunami_executed.ipynb \
           --ExecutePreprocessor.timeout=3600 \
           --debug
+
 
     # ----------------------------
     # 3. Build LaTeX
