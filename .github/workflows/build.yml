@@ -1,4 +1,4 @@
-name: Run simulations and build LaTeX report
+name: Run simulations and build reports
 
 on:
   push:
@@ -23,59 +23,62 @@ jobs:
 
     - name: Install Python libs
       run: |
-        # 1. Najpierw wymuś poprawne wersje NumPy i Numba
         pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
-    
-        # 2. Zainstaluj PyMPDATA (korzysta z numby)
         pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
-    
-        # 3. Dopiero potem resztę
-        pip install --no-cache-dir matplotlib imageio tqdm jupyter nbconvert ipykernel
-    
-        # 4. open-atmos-jupyter-utils – może wymuszać NumPy 2.x, więc niech idzie po PyMPDATA
-        pip install --no-cache-dir open-atmos-jupyter-utils \
-          || pip install --no-cache-dir git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
-    
-        # 5. I na koniec *znowu* wymuś wersję
+        pip install matplotlib imageio tqdm jupyter nbconvert ipykernel
+        pip install open-atmos-jupyter-utils \
+          || pip install git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
         pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
-
-
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
 
     # ----------------------------
-    # 2. Run the notebook
+    # 2. Run the notebook → save PDF + figures
     # ----------------------------
-    - name: Run notebook
+    - name: Execute notebook and export PDF
       run: |
         jupyter nbconvert \
           --to notebook \
           --execute notebook/projekt_tsunami.ipynb \
-          --output projekt_tsunami_executed.ipynb \
+          --output executed.ipynb \
           --output-dir notebook \
-          --ExecutePreprocessor.timeout=3600 \
-          --debug
+          --ExecutePreprocessor.timeout=3600
 
+        # convert executed notebook to PDF
+        jupyter nbconvert \
+          notebook/executed.ipynb \
+          --to pdf \
+          --output projekt_tsunami.pdf \
+          --output-dir .
 
     # ----------------------------
-    # 3. Build LaTeX
+    # 3. Build LaTeX report → sprawozdanie.pdf
     # ----------------------------
-    - name: Install LaTeX
+    - name: Build LaTeX report
       uses: xu-cheng/latex-action@v3
       with:
         root_file: main.tex
         working_directory: report
+        output_directory: ..
 
     # ----------------------------
-    # 4. Upload artifacts
+    # 4. Create ZIP package
     # ----------------------------
-    - name: Upload artifacts
+    - name: Create artifact ZIP
+      run: |
+        mkdir artifact
+        cp sprawozdanie.pdf artifact/
+        cp projekt_tsunami.pdf artifact/
+        cp -r fig artifact/
+        cd artifact
+        zip -r ../simulation_outputs.zip .
+
+    # ----------------------------
+    # 5. Upload ZIP as artifact
+    # ----------------------------
+    - name: Upload results
       uses: actions/upload-artifact@v4
       with:
-        name: report-and-simulation-outputs
-        path: |
-          report/main.pdf
-          projekt_tsunami_executed.ipynb
-          fig/
-  
+        name: final-simulation-package
+        path: simulation_outputs.zip
