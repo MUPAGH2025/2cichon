@@ -32,6 +32,11 @@ jobs:
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
+    
+    - name: Install pandoc
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pandoc
 
     # ----------------------------
     # 2. Run the notebook → save PDF + figures
