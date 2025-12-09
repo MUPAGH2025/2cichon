@@ -1,4 +1,4 @@
-name: Run simulations and build reports
+name: Run simulations and build LaTeX report
 
 on:
   push:
@@ -14,89 +14,78 @@ jobs:
       uses: actions/checkout@v4
 
     # ----------------------------
-    # Python + dependencies
+    # 1. Install Python
     # ----------------------------
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    - name: Install Python libs (strict pinned versions)
+    - name: Install Python libs
       run: |
-        pip install --no-cache-dir --force-reinstall "numpy==1.26.4" "numba<0.60"
-        pip install --no-cache-dir git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
+        # 1. Wymuś poprawne wersje NumPy i Numba
+        pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
     
-        # instalujemy pozostałe pakiety BEZ aktualizacji numpy!!
-        pip install --no-deps matplotlib imageio tqdm ipykernel
-        pip install --no-deps jupyter nbconvert
-        pip install --no-deps open-atmos-jupyter-utils || true
+        # 2. Zainstaluj PyMPDATA
+        pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
     
-        # teraz doinstalowujemy brakujące zależności, NIE tykając NumPy
-        pip install --no-cache-dir --upgrade-strategy only-if-needed matplotlib imageio tqdm jupyter nbconvert ipykernel open-atmos-jupyter-utils
-
+        # 3. Inne biblioteki
+        pip install --no-cache-dir matplotlib imageio tqdm jupyter nbconvert ipykernel
+    
+        # 4. open-atmos-jupyter-utils
+        pip install --no-cache-dir open-atmos-jupyter-utils \
+          || pip install --no-cache-dir git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
+    
+        # 5. Ponownie wymuś wersję numba/numpy
+        pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
 
-    # ----------------------------
-    # Execute notebook
-    # ----------------------------
-    - name: Execute notebook
+    # -------------------------------------------------------
+    # EXTRA: tools needed for PDF export
+    # -------------------------------------------------------
+    - name: Install pandoc + TeXLive for nbconvert PDF
       run: |
-        jupyter nbconvert \
-          --to notebook \
-          --execute notebook/projekt_tsunami.ipynb \
-          --output executed.ipynb \
-          --output-dir notebook \
-          --ExecutePreprocessor.timeout=3600
+        sudo apt-get update
+        sudo apt-get install -y pandoc \
+            texlive-latex-base texlive-latex-extra texlive-xetex texlive-fonts-recommended
 
     # ----------------------------
-    # Convert notebook → LaTeX
+    # 2. Run the notebook
     # ----------------------------
-    - name: Convert notebook to LaTeX
+    - name: Run notebook
       run: |
-        jupyter nbconvert notebook/executed.ipynb \
-          --to latex \
-          --output notebook.tex \
-          --output-dir notebook_pdf
+        jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
+          --output projekt_tsunami_executed.ipynb \
+          --ExecutePreprocessor.timeout=3600 \
+          --debug
 
     # ----------------------------
-    # Build notebook PDF
+    # 2a. Convert executed notebook → PDF
     # ----------------------------
-    - name: Build notebook PDF
-      uses: xu-cheng/latex-action@v3
-      with:
-        root_file: notebook.tex
-        working_directory: notebook_pdf
-        output_directory: .
+    - name: Convert notebook to PDF
+      run: |
+        jupyter nbconvert notebook/projekt_tsunami_executed.ipynb --to pdf \
+          --output projekt_tsunami.pdf
 
     # ----------------------------
-    # Build LaTeX report
+    # 3. Build LaTeX report
     # ----------------------------
-    - name: Build sprawozdanie
+    - name: Build LaTeX report
       uses: xu-cheng/latex-action@v3
       with:
         root_file: main.tex
         working_directory: report
-        output_directory: .
 
     # ----------------------------
-    # ZIP
+    # 4. Upload artifacts (NO .ipynb)
     # ----------------------------
-    - name: Create ZIP
-      run: |
-        mkdir artifact
-        cp sprawozdanie.pdf artifact/
-        cp notebook.pdf artifact/projekt_tsunami.pdf
-        cp -r fig artifact/
-        cd artifact
-        zip -r ../results.zip .
-
-    # ----------------------------
-    # Upload final package
-    # ----------------------------
-    - name: Upload results
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: simulation-outputs
-        path: results.zip
+        name: report-and-simulation-outputs
+        path: |
+          report/main.pdf
+          projekt_tsunami.pdf
+          fig/
