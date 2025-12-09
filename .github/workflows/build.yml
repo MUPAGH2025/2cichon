@@ -21,11 +21,19 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Install Python libs
+    - name: Install Python libs (strict pinned versions)
       run: |
-        pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
-        pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
-        pip install matplotlib imageio tqdm jupyter nbconvert ipykernel
+        pip install --no-cache-dir --force-reinstall "numpy==1.26.4" "numba<0.60"
+        pip install --no-cache-dir git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
+    
+        # instalujemy pozostałe pakiety BEZ aktualizacji numpy!!
+        pip install --no-deps matplotlib imageio tqdm ipykernel
+        pip install --no-deps jupyter nbconvert
+        pip install --no-deps open-atmos-jupyter-utils || true
+    
+        # teraz doinstalowujemy brakujące zależności, NIE tykając NumPy
+        pip install --no-cache-dir --upgrade-strategy only-if-needed matplotlib imageio tqdm jupyter nbconvert ipykernel open-atmos-jupyter-utils
+
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
