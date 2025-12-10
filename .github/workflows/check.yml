@@ -1,6 +1,0 @@
-- name: List workspace files
-  run: |
-    echo "=== Workspace root ==="
-    ls -al .
-    echo "=== Notebook folder ==="
-    ls -al notebook
