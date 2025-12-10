@@ -23,52 +23,63 @@ jobs:
 
     - name: Install Python libs
       run: |
-        # 1. Najpierw wymuś poprawne wersje NumPy i Numba
+        # 1. Wymuś poprawne wersje NumPy i Numba
         pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
     
-        # 2. Zainstaluj PyMPDATA (korzysta z numby)
+        # 2. Zainstaluj PyMPDATA
         pip install git+https://github.com/atmos-cloud-sim-uj/PyMPDATA.git
     
-        # 3. Dopiero potem resztę
+        # 3. Inne biblioteki
         pip install --no-cache-dir matplotlib imageio tqdm jupyter nbconvert ipykernel
     
-        # 4. open-atmos-jupyter-utils – może wymuszać NumPy 2.x, więc niech idzie po PyMPDATA
+        # 4. open-atmos-jupyter-utils
         pip install --no-cache-dir open-atmos-jupyter-utils \
           || pip install --no-cache-dir git+https://github.com/open-atmos/open-atmos-jupyter-utils.git
     
-        # 5. I na koniec *znowu* wymuś wersję
+        # 5. Ponownie wymuś wersję numba/numpy
         pip install --force-reinstall --no-cache-dir "numpy<1.27" "numba<0.60"
-
-
 
     - name: Register Jupyter kernel
       run: python -m ipykernel install --user --name python3
+
+    # -------------------------------------------------------
+    # EXTRA: tools needed for PDF export
+    # -------------------------------------------------------
+    - name: Install pandoc + TeXLive for nbconvert PDF
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y pandoc \
+            texlive-latex-base texlive-latex-extra texlive-xetex texlive-fonts-recommended
 
     # ----------------------------
     # 2. Run the notebook
     # ----------------------------
     - name: Run notebook
       run: |
-        jupyter nbconvert \
-          --to notebook \
-          --execute notebook/projekt_tsunami.ipynb \
+        jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
           --output projekt_tsunami_executed.ipynb \
-          --output-dir notebook \
           --ExecutePreprocessor.timeout=3600 \
           --debug
 
+    # ----------------------------
+    # 2a. Convert executed notebook → PDF
+    # ----------------------------
+    - name: Convert notebook to PDF
+      run: |
+        jupyter nbconvert notebook/projekt_tsunami_executed.ipynb --to pdf \
+          --output projekt_tsunami.pdf
 
     # ----------------------------
-    # 3. Build LaTeX
+    # 3. Build LaTeX report
     # ----------------------------
-    - name: Install LaTeX
+    - name: Build LaTeX report
       uses: xu-cheng/latex-action@v3
       with:
         root_file: main.tex
         working_directory: report
 
     # ----------------------------
-    # 4. Upload artifacts
+    # 4. Upload artifacts (NO .ipynb)
     # ----------------------------
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -76,6 +87,5 @@ jobs:
         name: report-and-simulation-outputs
         path: |
           report/main.pdf
-          projekt_tsunami_executed.ipynb
+          projekt_tsunami.pdf
           fig/
-  
