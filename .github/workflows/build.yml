@@ -57,7 +57,7 @@ jobs:
     - name: Run notebook
       run: |
         jupyter nbconvert --to notebook --execute notebook/test.ipynb \
-          --output projekt_tsunami_executed.ipynb \
+          --output notebook/projekt_tsunami_executed.ipynb \
           --ExecutePreprocessor.timeout=3600 \
           --debug
 
@@ -67,7 +67,7 @@ jobs:
     - name: Convert notebook to PDF
       run: |
         jupyter nbconvert notebook/projekt_tsunami_executed.ipynb --to pdf \
-          --output projekt_tsunami.pdf
+          --output notebook/projekt_tsunami.pdf
 
     # ----------------------------
     # 3. Build LaTeX report
@@ -87,5 +87,5 @@ jobs:
         name: report-and-simulation-outputs
         path: |
           report/main.pdf
-          projekt_tsunami.pdf
+          notebook/projekt_tsunami.pdf
           fig/
