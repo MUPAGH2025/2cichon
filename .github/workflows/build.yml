@@ -56,7 +56,7 @@ jobs:
     # ----------------------------
     - name: Run notebook
       run: |
-        jupyter nbconvert --to notebook --execute notebook/test.ipynb \
+        jupyter nbconvert --to notebook --execute notebook/projekt_tsunami.ipynb \
           --output projekt_tsunami_executed.ipynb \
           --ExecutePreprocessor.timeout=3600 \
           --debug
